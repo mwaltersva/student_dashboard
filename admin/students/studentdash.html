@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<!-- start right frame -->
+<head>
+<title>~[text:psx.html.admin_students.misc.other_information]</title>
+~[wc:commonscripts]
+<link href="/images/css/screen.css" rel="stylesheet" media="screen">
+<link href="/images/css/print.css" rel="stylesheet" media="print">
+<script src="/scripts/highcharts/highcharts.js" type="text/javascript"></script>
+<style>
+.warning {
+	color: #FF0000;
+	font-weight: bold;
+}
+
+td.bold {
+	text-align: right;
+}
+
+td.studentDashPortal {
+	width: 50%;
+}
+
+</style>
+<script type="text/javascript">
+
+$j(document).ready(function() {
+	$j.get('studentdash/dailyAttendanceSummary.html?frn=~(frn)&request=get', function(data) {
+		$j('#dailyAttendanceSummary').html(data);
+	});
+	
+	$j.get('studentdash/coursesFailing.html?frn=~(frn)&request=get', function(data) {
+		$j('#coursesFailing').html(data);
+	});
+	
+	$j.get('studentdash/solFailed.html?frn=~(frn)&request=get', function(data) {
+		$j('#solFailed').html(data);
+	});
+	$j.get('studentdash/referralsByMonth.html?frn=~(frn)&request=get', function(data) {
+		$j('#referralsByMonth').html(data);
+	});
+});
+
+</script>
+</head>
+<body>
+
+<form action="/admin/changesrecorded.white.html" method="POST">
+~[wc:admin_header_frame_css]<!-- breadcrumb start --><a href="/admin/home.html" target="_top">~[text:psx.html.admin_students.misc.start_page]</a> &gt; <a href="home.html?selectstudent=nosearch" target="_top">~[text:psx.html.admin_students.misc.student_selection]</a> &gt;~[text:psx.html.admin_students.misc.other_information1]<!-- breadcrumb end -->~[wc:admin_navigation_frame_css]
+
+~[wc:title_student_begin_css]~[text:psx.html.admin_students.misc.other_information2]~[wc:title_student_end_css]
+
+<!-- start of content and bounding box -->
+<div class="box-round">
+<h2>Student Dashboard</h2>
+<table>
+	<thead>
+	<tr>
+		<th colspan="4">Risk Overview</th>
+	</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td class="bold">Risk Category</td>
+			<td colspan="2">~[if#riskcat.~(wps_at_risk_status)>0]<font class="warning">Category ~(wps_at_risk_status)</font>[else#riskcat]Not at risk[/if#riskcat]</td>
+		</tr>
+		<tr>
+			<th colspan="4">Risk Indicators</th>
+		</tr>
+		<tr>
+			<td class="bold">IDed below level in PALs</td>
+			<td>~(decode;~(wps_at_risk_pals_idbl);1;<font class="warning">Yes</font>;No)</td>
+			<td class="bold">Failed an SOL test last year</td>
+			<td>~(decode;~(wps_at_risk_failed_sol);1;<font class="warning">Yes</font>;No)</td>
+		</tr>
+		<tr>
+			<td class="bold">5 or more days suspended</td>
+			<td>~(decode;~(wps_at_risk_days_suspended);1;<font class="warning">Yes</font>;No)</td>
+			<td class="bold">No progress in two or more classes</td>
+			<td>~(decode;~(wps_at_risk_no_progress);1;<font class="warning">Yes</font>;No)</td>
+		</tr>
+		<tr>
+			<td class="bold">Ever Retained</td>
+			<td>~(decode;~(wps_at_risk_retained);1;<font class="warning">Yes</font>;No)</td>
+			<td></td>
+			<td></td>
+		</tr>
+		~[if#retained.~(wps_at_risk_retained)=1]
+		<tr>
+			<td class="bold">Retentions</td>
+			<td>
+				~[tlist_sql;
+					SELECT
+					  enrmerge.grade_level gl,
+					  count(enrmerge.grade_level) times
+					FROM
+					  (
+						SELECT
+						  pse.studentid,
+						  pse.yearid,
+						  pse.grade_level
+						FROM ps_enrollment_all pse
+						WHERE
+						  pse.exitdate-pse.entrydate > 15
+						  AND pse.grade_level > -1
+						GROUP BY pse.studentid, pse.yearid, pse.grade_level
+					  ) enrmerge
+					WHERE enrmerge.studentid = ~(curstudid)
+					GROUP BY enrmerge.grade_level, enrmerge.studentid
+					HAVING count(enrmerge.grade_level) > 1
+					ORDER BY enrmerge.studentid, enrmerge.grade_level ASC;]
+				
+					Grade Level: <font class="bold">~(grade_level)</font> Times Taken: <font class="bold">~(times)</font><br />
+				[/tlist_sql]
+			</td>
+			<td></td>
+		</tr>
+		[/if#retained]
+	</tbody>
+</table>
+<table>
+	<tr class="bold">
+		<th>Student Overview</th>
+	</tr>
+	<tr>
+		<td class="studentDashPortal"><div id="dailyAttendanceSummary">Loading</div><br /></td>
+	</tr>
+	<tr>
+		<th>Courses failing or in Danger of failing</th>
+	</tr>
+	<tr>
+		<td class="studentDashPortal"><div id="coursesFailing">Loading</div><br /></td>
+	</tr>
+	<tr class="bold">
+		<th>SOL Scores below 425</th>
+	</tr>
+	<tr>
+		<td class="studentDashPortal"><div id="solFailed">Loading</div></td>
+	</tr>
+	<tr>
+		<td class="studentDashPortal"><div id="referralsByMonth">Loading</div></td>
+	</tr>
+</table>
+</div>
+<br>
+<!-- end of content of bounding box -->
+
+~[wc:admin_footer_frame_css]
+</form>
+
+</body>
+</html><!-- end right frame -->
