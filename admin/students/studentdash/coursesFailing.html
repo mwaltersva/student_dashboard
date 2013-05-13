@@ -1,0 +1,248 @@
+~[if.~[gpv:request]#get] 
+~[redirect:/admin/students/studentdash.html?frn=~(frn)] 
+[/if]
+<table class="grid">
+	<tr>
+		<th>Course Name</th>
+		<th>Term</th>
+		<th>Period</th>
+		<th>Q1</th>
+		<th>Q2</th>
+		<th>S1</th>
+		<th>Q3</th>
+		<th>Q4</th>
+		<th>S2</th>
+		<th>Y1</th>
+	</tr>
+	~[tlist_sql;
+		SELECT
+		  g.course_name,
+		  g.abbreviation,
+		  g.expression,
+		  g.q1,
+		  g.q2,
+		  g.s1,
+		  g.q3,
+		  g.q4,
+		  g.s2,
+		  g.y1
+		FROM
+		  (
+			SELECT
+			  c.course_name,
+			  t.abbreviation,
+			  sec.expression,
+			  CASE WHEN
+				current_date-(
+				  SELECT tb.date2
+				  FROM termbins tb
+				  WHERE
+					tb.schoolid = t.schoolid
+					AND tb.termid = t.id
+					AND tb.storecode = 'Q1'
+				) > 15 THEN (
+				  SELECT
+					sg.grade
+				  FROM storedgrades sg
+				  WHERE
+					sg.course_number = c.course_number
+					AND sg.studentid = cc.studentid
+					AND sg.sectionid = cc.sectionid
+					AND sg.storecode = 'Q1'
+				) ELSE (
+				  SELECT
+					pgf.grade
+				  FROM pgfinalgrades pgf
+				  WHERE
+					pgf.sectionid = cc.sectionid
+					AND pgf.studentid = cc.studentid
+					AND pgf.finalgradename = 'Q1'
+				) END Q1,
+			  CASE WHEN
+				current_date-(
+				  SELECT tb.date2
+				  FROM termbins tb
+				  WHERE
+					tb.schoolid = t.schoolid
+					AND tb.termid = t.id
+					AND tb.storecode = 'Q2'
+				) > 15 THEN (
+				  SELECT
+					sg.grade
+				  FROM storedgrades sg
+				  WHERE
+					sg.course_number = c.course_number
+					AND sg.studentid = cc.studentid
+					AND sg.sectionid = cc.sectionid
+					AND sg.storecode = 'Q2'
+				) ELSE (
+				  SELECT
+					pgf.grade
+				  FROM pgfinalgrades pgf
+				  WHERE
+					pgf.sectionid = cc.sectionid
+					AND pgf.studentid = cc.studentid
+					AND pgf.finalgradename = 'Q2'
+				) END Q2,
+			  CASE WHEN
+				current_date-(
+				  SELECT tb.date2
+				  FROM termbins tb
+				  WHERE
+					tb.schoolid = t.schoolid
+					AND tb.termid = t.id
+					AND tb.storecode = 'S1'
+				) > 15 THEN (
+				  SELECT
+					sg.grade
+				  FROM storedgrades sg
+				  WHERE
+					sg.course_number = c.course_number
+					AND sg.studentid = cc.studentid
+					AND sg.sectionid = cc.sectionid
+					AND sg.storecode = 'S1'
+				) ELSE (
+				  SELECT
+					pgf.grade
+				  FROM pgfinalgrades pgf
+				  WHERE
+					pgf.sectionid = cc.sectionid
+					AND pgf.studentid = cc.studentid
+					AND pgf.finalgradename = 'S1'
+				) END S1,
+			  CASE WHEN
+				current_date-(
+				  SELECT tb.date2
+				  FROM termbins tb
+				  WHERE
+					tb.schoolid = t.schoolid
+					AND tb.termid = t.id
+					AND tb.storecode = 'Q3'
+				) > 15 THEN (
+				  SELECT
+					sg.grade
+				  FROM storedgrades sg
+				  WHERE
+					sg.course_number = c.course_number
+					AND sg.studentid = cc.studentid
+					AND sg.sectionid = cc.sectionid
+					AND sg.storecode = 'Q3'
+				) ELSE (
+				  SELECT
+					pgf.grade
+				  FROM pgfinalgrades pgf
+				  WHERE
+					pgf.sectionid = cc.sectionid
+					AND pgf.studentid = cc.studentid
+					AND pgf.finalgradename = 'Q3'
+				) END Q3,
+			  CASE WHEN
+				current_date-(
+				  SELECT tb.date2
+				  FROM termbins tb
+				  WHERE
+					tb.schoolid = t.schoolid
+					AND tb.termid = t.id
+					AND tb.storecode = 'Q4'
+				) > 15 THEN (
+				  SELECT
+					sg.grade
+				  FROM storedgrades sg
+				  WHERE
+					sg.course_number = c.course_number
+					AND sg.studentid = cc.studentid
+					AND sg.sectionid = cc.sectionid
+					AND sg.storecode = 'Q4'
+				) ELSE (
+				  SELECT
+					pgf.grade
+				  FROM pgfinalgrades pgf
+				  WHERE
+					pgf.sectionid = cc.sectionid
+					AND pgf.studentid = cc.studentid
+					AND pgf.finalgradename = 'Q4'
+				) END Q4,
+			  CASE WHEN
+				current_date-(
+				  SELECT tb.date2
+				  FROM termbins tb
+				  WHERE
+					tb.schoolid = t.schoolid
+					AND tb.termid = t.id
+					AND tb.storecode = 'S2'
+				) > 15 THEN (
+				  SELECT
+					sg.grade
+				  FROM storedgrades sg
+				  WHERE
+					sg.course_number = c.course_number
+					AND sg.studentid = cc.studentid
+					AND sg.sectionid = cc.sectionid
+					AND sg.storecode = 'S2'
+				) ELSE (
+				  SELECT
+					pgf.grade
+				  FROM pgfinalgrades pgf
+				  WHERE
+					pgf.sectionid = cc.sectionid
+					AND pgf.studentid = cc.studentid
+					AND pgf.finalgradename = 'S2'
+				) END S2,
+			  CASE WHEN
+				current_date-(
+				  SELECT tb.date2
+				  FROM termbins tb
+				  WHERE
+					tb.schoolid = t.schoolid
+					AND tb.termid = t.id
+					AND tb.storecode = 'Y1'
+				) > 15 THEN (
+				  SELECT
+					sg.grade
+				  FROM storedgrades sg
+				  WHERE
+					sg.course_number = c.course_number
+					AND sg.studentid = cc.studentid
+					AND sg.sectionid = cc.sectionid
+					AND sg.storecode = 'Y1'
+				) ELSE (
+				  SELECT
+					pgf.grade
+				  FROM pgfinalgrades pgf
+				  WHERE
+					pgf.sectionid = cc.sectionid
+					AND pgf.studentid = cc.studentid
+					AND pgf.finalgradename = 'Y1'
+				) END Y1
+			FROM cc
+			JOIN sections sec ON sec.id = cc.sectionid
+			JOIN courses c ON c.course_number = sec.course_number
+			JOIN terms t ON t.id = sec.termid AND t.schoolid = sec.schoolid
+			WHERE
+			  cc.studentid = ~(curstudid)
+			  AND t.yearid = ~(curyearid)
+			ORDER BY t.abbreviation, sec.expression ASC
+		  ) g
+		WHERE
+		  lower(g.q1) IN ('n','i','f','d','nc','ng')
+		  OR lower(g.q2) IN ('n','i','f','d','nc','ng','d+','d-')
+		  OR lower(g.s1) IN ('n','i','f','d','nc','ng','d+','d-')
+		  OR lower(g.q3) IN ('n','i','f','d','nc','ng','d+','d-')
+		  OR lower(g.q4) IN ('n','i','f','d','nc','ng','d+','d-')
+		  OR lower(g.s2) IN ('n','i','f','d','nc','ng','d+','d-')
+		  OR lower(g.y1) IN ('n','i','f','d','nc','ng','d+','d-');]
+			<tr>
+				<td><font class="bold">~(course_name)</font></td>
+				<td>~(abbreviation)</td>
+				<td>~(expression)</td>
+				<td>~(Q1)</td>
+				<td>~(q2)</td>
+				<td>~(S1)</td>
+				<td>~(Q3)</td>
+				<td>~(Q4)</td>
+				<td>~(S2)</td>
+				<td>~(Y1)</td>
+			</tr>
+	[/tlist_sql]
+</table>
+		

@@ -1,0 +1,112 @@
+~[if.~[gpv:request]#get] 
+~[redirect:/admin/students/studentdash.html?frn=~(frn)] 
+[/if]
+<div id="chartMonthlyReferrals">Percent</div>
+<script type="text/javascript">
+$j(function() {
+	$j(document).ready(function() {
+		referralsByMonthChart = new Highcharts.Chart({
+			chart: {
+				renderTo: 'chartMonthlyReferrals',
+				type: 'line',
+				height: 250
+			},
+			
+			title: {
+				text: 'Count of Referrals and Days Suspended by Month'
+			},
+			xAxis: {
+				categories: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+			},
+			yAxis: {
+				title: {
+					text: ''
+				},
+				min: 0
+			},
+			tooltop: {
+				formatter: function() {
+					return '<b>'+ this.series.name +'</b><br/>'+
+					this.x +': '+ this.y +'%';
+				}
+			},
+			legend: {
+				layout: 'vertical',
+				align: 'right',
+				verticalAlign: 'top',
+				borderWidth: 0,
+				y: 100
+			},
+			series: [{
+				name: 'Referalls',
+				data: [
+					~[tlist_sql;
+						SELECT
+						  NVL("'AUG'",0) || chr(44) AUG,
+						  NVL("'SEP'",0) || chr(44) SEP,
+						  NVL("'OCT'",0) || chr(44) OCT,
+						  NVL("'NOV'",0) || chr(44) NOV,
+						  NVL("'DEC'",0) || chr(44) DEC,
+						  NVL("'JAN'",0) || chr(44) JAN,
+						  NVL("'FEB'",0) || chr(44) FEB,
+						  NVL("'MAR'",0) || chr(44) MAR,
+						  NVL("'APR'",0) || chr(44) APR,
+						  NVL("'MAY'",0) || chr(44) MAY,
+						  NVL("'JUN'",0) JUN
+						FROM (
+						  SELECT
+							count(l.id) refs,
+							to_char(l.entry_date, 'MON') mon
+						  FROM log l
+						  JOIN terms t ON l.entry_date BETWEEN t.firstday AND t.lastday AND t.schoolid = l.schoolid
+						  WHERE
+							l.logtypeid = -100000
+							AND l.studentid = ~(curstudid)
+							AND t.isyearrec=1
+							AND t.yearid = ~(curyearid)
+						  GROUP BY to_char(l.entry_date, 'MON'), to_char(l.entry_date, 'YYYY-MM')
+						  ORDER BY to_char(l.entry_date, 'YYYY-MM') ASC
+						  ) PIVOT (
+							sum(refs)
+							FOR mon IN ('AUG', 'SEP', 'OCT','NOV','DEC','JAN','FEB','MAR','APR','MAY','JUN')
+						  );]~(AUG)~(SEP)~(OCT)~(NOV)~(DEC)~(JAN)~(FEB)~(MAR)~(APR)~(MAY)~(JUN)[/tlist_sql]
+				]
+			}, {
+				name: 'Days Suspended',
+				data: [
+					~[tlist_sql;
+						SELECT
+						  NVL("'AUG'",0) || chr(44) AUG,
+						  NVL("'SEP'",0) || chr(44) SEP,
+						  NVL("'OCT'",0) || chr(44) OCT,
+						  NVL("'NOV'",0) || chr(44) NOV,
+						  NVL("'DEC'",0) || chr(44) DEC,
+						  NVL("'JAN'",0) || chr(44) JAN,
+						  NVL("'FEB'",0) || chr(44) FEB,
+						  NVL("'MAR'",0) || chr(44) MAR,
+						  NVL("'APR'",0) || chr(44) APR,
+						  NVL("'MAY'",0) || chr(44) MAY,
+						  NVL("'JUN'",0) JUN
+						FROM (
+						  SELECT
+							sum(ps_customfields.getcf('log', l.id, 'va_days_suspended')) refs,
+							to_char(l.entry_date, 'MON') mon
+						  FROM log l
+						  JOIN terms t ON l.entry_date BETWEEN t.firstday AND t.lastday AND t.schoolid = l.schoolid
+						  WHERE
+							l.logtypeid = -100000
+							AND l.studentid = ~(curstudid)
+							AND t.isyearrec=1
+							AND t.yearid = ~(curyearid)
+						  GROUP BY to_char(l.entry_date, 'MON'), to_char(l.entry_date, 'YYYY-MM')
+						  ORDER BY to_char(l.entry_date, 'YYYY-MM') ASC
+						  ) PIVOT (
+							sum(refs)
+							FOR mon IN ('AUG', 'SEP', 'OCT','NOV','DEC','JAN','FEB','MAR','APR','MAY','JUN')
+						);]~(AUG)~(SEP)~(OCT)~(NOV)~(DEC)~(JAN)~(FEB)~(MAR)~(APR)~(MAY)~(JUN)[/tlist_sql]
+				]}]
+		});
+	});
+});
+</script>
+

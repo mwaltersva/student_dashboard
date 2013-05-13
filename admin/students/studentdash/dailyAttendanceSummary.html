@@ -1,0 +1,119 @@
+~[if.~[gpv:request]#get] 
+~[redirect:/admin/students/studentdash.html?frn=~(frn)] 
+[/if]
+<div id="chartDailyPercent">Percent</div>
+<script type="text/javascript">
+$j(function() {
+	$j(document).ready(function() {
+		dailyAttendancePercentChart = new Highcharts.Chart({
+			chart: {
+				renderTo: 'chartDailyPercent',
+				type: 'line',
+                                height: 250
+			},
+			
+			title: {
+				text: 'Percent in Attendance by Month'
+			},
+			xAxis: {
+				categories: ['Aug', 'Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun']
+			},
+			yAxis: {
+				title: {
+					text: 'Percent Attended'
+				},
+                                max: 100,
+                                min: 50
+			},
+			tooltip: {
+				formatter: function() {
+					return '<b>'+ this.series.name +'</b><br/>'+
+					this.x +': '+ this.y +'%';
+				}
+			},
+			legend: {
+				layout: 'vertical',
+				align: 'right',
+				verticalAlign: 'top',
+				borderWidth: 0,
+                                y: 100
+			},
+			series: [{
+				name: 'This Student',
+				data: [
+					~[tlist_sql;
+						SELECT
+						  NVL("'AUG'",'0') || chr(44) AUG,
+              NVL("'SEP'",'0') || chr(44) SEP,
+              NVL("'OCT'",'0') || chr(44) OCT,
+              NVL("'NOV'",'0') || chr(44) NOV,
+              NVL("'DEC'",'0') || chr(44) DEC,
+              NVL("'JAN'",'0') || chr(44) JAN,
+              NVL("'FEB'",'0') || chr(44) FEB,
+              NVL("'MAR'",'0') || chr(44) MAR,
+              NVL("'APR'",'0') || chr(44) APR,
+              NVL("'MAY'",'0') || chr(44) MAY,
+              NVL("'JUN'",'0') JUN
+						FROM
+						  (
+							SELECT
+							  to_char(ada.calendardate, 'MON') mon,
+							  round(sum(ada.attendancevalue)/sum(ada.membershipvalue)*100) ada
+							FROM ps_adaadm_defaults_all ada
+							JOIN terms t ON ada.calendardate BETWEEN t.firstday AND t.lastday AND ada.schoolid = t.schoolid
+							WHERE
+							  t.isyearrec = 1
+							  AND t.yearid = ~(curyearid)
+							  AND ada.studentid = ~(curstudid)
+							  AND to_date(to_char(ada.calendardate, 'DD-MON-YY'), 'DD-MON-YY') < to_date(to_char(current_date, 'DD-MON-YY'), 'DD-MON-YY')
+							GROUP BY to_char(ada.calendardate, 'MON')
+						  )
+						  PIVOT
+						  (
+							sum(ada)
+							FOR mon IN ('AUG', 'SEP', 'OCT', 'NOV', 'DEC', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN')
+              );]~(AUG)~(SEP)~(OCT)~(NOV)~(DEC)~(JAN)~(FEB)~(MAR)~(APR)~(MAY)~(JUN)[/tlist_sql]
+				]
+			}, {
+				name: 'This School',
+				data: [
+					~[tlist_sql;
+						SELECT
+						  NVL("'AUG'",'0') || chr(44) AUG,
+              NVL("'SEP'",'0') || chr(44) SEP,
+              NVL("'OCT'",'0') || chr(44) OCT,
+              NVL("'NOV'",'0') || chr(44) NOV,
+              NVL("'DEC'",'0') || chr(44) DEC,
+              NVL("'JAN'",'0') || chr(44) JAN,
+              NVL("'FEB'",'0') || chr(44) FEB,
+              NVL("'MAR'",'0') || chr(44) MAR,
+              NVL("'APR'",'0') || chr(44) APR,
+              NVL("'MAY'",'0') || chr(44) MAY,
+              NVL("'JUN'",'0') JUN
+						FROM
+						  (
+							SELECT
+							  to_char(ada.calendardate, 'MON') mon,
+							  round(sum(ada.attendancevalue)/sum(ada.membershipvalue)*100) ada
+							FROM ps_adaadm_defaults_all ada
+							JOIN terms t ON ada.calendardate BETWEEN t.firstday AND t.lastday AND ada.schoolid = t.schoolid
+							WHERE
+							  t.isyearrec = 1
+							  AND t.yearid = ~(curyearid)
+                AND ada.schoolid = ~(schoolid)
+							  AND to_date(to_char(ada.calendardate, 'DD-MON-YY'), 'DD-MON-YY') < to_date(to_char(current_date, 'DD-MON-YY'), 'DD-MON-YY')
+							GROUP BY to_char(ada.calendardate, 'MON')
+						  )
+						  PIVOT
+						  (
+							sum(ada)
+							FOR mon IN ('AUG', 'SEP', 'OCT', 'NOV', 'DEC', 'JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN')
+              );]~(AUG)~(SEP)~(OCT)~(NOV)~(DEC)~(JAN)~(FEB)~(MAR)~(APR)~(MAY)~(JUN)[/tlist_sql]
+				
+				]
+			}]
+		});
+	});
+});
+</script>
+

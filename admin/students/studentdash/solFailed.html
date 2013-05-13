@@ -1,0 +1,56 @@
+~[if.~[gpv:request]#get] 
+~[redirect:/admin/students/studentdash.html?frn=~(frn)] 
+[/if]
+<table class="grid">
+	<tr>
+		<th>Test name</th>
+		<th>Test Date</th>
+		<th>Score</th>
+		<th>Division Avg</th>
+		<th>Difference</th>
+	</tr>
+	~[tlist_sql;
+SELECT
+  t.name name,
+  MAX(to_char(st.test_date, 'MM/DD/YYYY')) testdate,
+  MAX(sts.numscore) score,
+  round(max((
+    SELECT
+      avg(sts1.numscore)
+    FROM test t1
+    JOIN studenttest st1 ON st1.testid = t1.id
+    JOIN studenttestscore sts1 ON sts1.studentid = st1.studentid AND sts1.studenttestid = st1.id
+    JOIN testscore ts1 ON ts1.id = sts1.testscoreid
+    WHERE
+      t1.id = t.id
+  ))) DivAvg,
+  MAX(sts.numscore) -
+  round(max((
+    SELECT
+      avg(sts1.numscore)
+    FROM test t1
+    JOIN studenttest st1 ON st1.testid = t1.id
+    JOIN studenttestscore sts1 ON sts1.studentid = st1.studentid AND sts1.studenttestid = st1.id
+    JOIN testscore ts1 ON ts1.id = sts1.testscoreid
+    WHERE
+      t1.id = t.id
+  ))) diff
+FROM test t
+JOIN testscore ts ON ts.testid = t.id
+JOIN studenttest st ON st.testid = t.id
+JOIN studenttestscore sts ON sts.studenttestid = st.id AND sts.testscoreid = ts.id AND sts.studentid = st.studentid
+WHERE
+  sts.studentid = ~(curstudid)
+  AND lower(ts.name) = 'passed'
+GROUP BY t.name, t.id
+HAVING max(sts.numscore) < 425
+ORDER BY max(st.test_date) DESC;]
+		<tr>
+			<td>~(name)</td>
+			<td>~(testdate)</td>
+			<td>~(score)</td>
+			<td>~(divavg)</td>
+			<td>~(diff)</td>
+		</tr>
+	[/tlist_sql]
+</table>
